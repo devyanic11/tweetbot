@@ -1,0 +1,45 @@
+name: Check Telegram Commands
+
+on:
+  schedule:
+    # Check for /givetweet commands every 15 minutes
+    - cron: '*/15 * * * *'
+
+jobs:
+  check-and-trigger:
+    runs-on: ubuntu-latest
+    environment: tweetENV
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests python-dotenv
+
+      - name: Check for /givetweet command
+        id: check
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python notification/check_command.py
+        continue-on-error: true
+
+      - name: Install full dependencies
+        if: steps.check.outcome == 'success'
+        run: pip install -r requirements.txt
+
+      - name: Run Tweet Engine
+        if: steps.check.outcome == 'success'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py

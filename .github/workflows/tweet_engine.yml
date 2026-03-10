@@ -2,8 +2,8 @@ name: AI Insight Tweet Engine
 
 on:
   schedule:
-    # Run every 10 mins
-    - cron: '*/10 * * * *'
+    # Run every 2 hours for auto-tweets
+    - cron: '0 */2 * * *'
   workflow_dispatch:
     # Allow manual trigger from GitHub UI
 
