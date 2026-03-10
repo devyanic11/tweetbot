@@ -90,3 +90,41 @@ Raw Tweet generated:
     except Exception as e:
         print(f"Error generating insight: {e}")
         return None
+
+def generate_quote_tweet(original_tweet_text, original_author):
+    """
+    Generates a quote-tweet style response to a trending AI/ML tweet.
+    Returns a short, opinionated reply the user can use when retweeting.
+    """
+    client = init_gemini()
+
+    prompt = f"""
+You are an AI/ML engineer on tech Twitter. Someone you follow just tweeted this:
+
+@{original_author}: "{original_tweet_text}"
+
+Write a short quote-tweet response. This is what you'd type above the retweet.
+
+TONE:
+- Casual, like texting a friend about a tweet you saw.
+- Add your own take, agree/disagree, extend the thought, or drop a related observation.
+- Be blunt, slightly opinionated, real.
+- NEVER use emojis, hashtags, or corporate speak.
+- Do NOT just agree politely. Add something new.
+
+CONSTRAINTS:
+- Max 200 characters.
+- Output ONLY the raw response text. No quotes, no attribution.
+
+Your quote-tweet response:
+"""
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+        return response.text.strip()
+    except Exception as e:
+        print(f"Error generating quote tweet: {e}")
+        return None
