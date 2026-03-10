@@ -7,6 +7,7 @@ from scraper.twitter_fetcher import fetch_trending_ai_tweets
 from tweet.tweet_writer import craft_final_tweet
 from analysis.insight_generator import generate_quote_tweet
 from notification.telegram_sender import send_telegram_message
+from notification.twitter_sender import post_tweet
 
 def _output_tweet(tweet_text, source_url, score):
     """Prints the tweet and sends it to Telegram."""
@@ -17,8 +18,15 @@ def _output_tweet(tweet_text, source_url, score):
     print(f"\nQuality Score: {score}/10\n")
     print("-" * 40)
 
+    # Post to Twitter
+    posted_url = post_tweet(tweet_text)
+
     # Send to Telegram
-    send_telegram_message(tweet_text, source_url)
+    if posted_url:
+        telegram_msg = f"Just posted a new tweet!\n\n{tweet_text}\n\nLive link: {posted_url}"
+        send_telegram_message(telegram_msg)
+    else:
+        send_telegram_message(tweet_text, source_url)
 
 def _try_quote_tweet_path():
     """
@@ -41,20 +49,27 @@ def _try_quote_tweet_path():
 
         response = generate_quote_tweet(original_text, original_author)
         if response:
-            # Format the Telegram message with the original tweet and your response
-            message = (
-                f"Quote Tweet Idea:\n\n"
-                f"Your response:\n{response}\n\n"
-                f"Original tweet by @{original_author}:\n\"{original_text}\""
-            )
-            print(f"\nQuote Tweet Suggestion:\n")
+            print(f"\nQuote Tweet Generated:\n")
             print(f"Your response: {response}")
             print(f"Original: @{original_author}: {original_text[:100]}...")
             if tweet_url:
                 print(f"Tweet link: {tweet_url}")
             print("-" * 40)
 
-            send_telegram_message(message, tweet_url)
+            # Auto-post the quote tweet
+            posted_url = post_tweet(response, quote_url=tweet_url)
+
+            if posted_url:
+                message = f"Just Quote-Tweeted this!\n\nYour response:\n{response}\n\nLive link: {posted_url}"
+                send_telegram_message(message)
+            else:
+                # Format fallback suggestion if API fails
+                message = (
+                    f"Quote Tweet Idea (Auto-post failed):\n\n"
+                    f"Your response:\n{response}\n\n"
+                    f"Original tweet by @{original_author}:\n\"{original_text}\""
+                )
+                send_telegram_message(message, tweet_url)
             return True
 
     return False
