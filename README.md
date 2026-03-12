@@ -86,41 +86,44 @@ Tweets are generated and then **reviewed by Gemini itself**; low‑scoring draft
 ```mermaid
 flowchart LR
     subgraph Trigger
-        A[GitHub Actions cron\nor Local python main.py]
-        B[Telegram /givetweet\nvia Cloudflare Worker]
+        A["GitHub Actions cron or local main.py"]
+        B["Telegram /givetweet via Cloudflare Worker"]
     end
 
     subgraph Pipeline
-        C[run_tweet_pipeline()\n(scheduler/runner.py)]
-        D{Choose path}
-        E[Fetch RSS/HN links\nscraper/rss_fetcher.py\nscraper/hackernews_fetcher.py]
-        F[Scrape article text\nscraper/article_scraper.py]
-        G[Generate insight\nanalysis/insight_generator.py]
-        H[Generate random thought\nanalysis/insight_generator.py]
-        I[Fetch trending AI tweets\nscraper/twitter_fetcher.py]
-        J[Generate quote tweet\nanalysis/insight_generator.py]
-        K[Evaluate & rewrite tweet\ntweet/tweet_writer.py]
+        C["run_tweet_pipeline scheduler/runner.py"]
+        D{"Choose path"}
+        E["Fetch RSS and HN links"]
+        F["Scrape article text"]
+        G["Generate insight"]
+        H["Generate random thought"]
+        I["Fetch trending AI tweets"]
+        J["Generate quote tweet"]
+        K["Evaluate and rewrite tweet"]
     end
 
     subgraph Outputs
-        L[Post to X/Twitter\nnotification/twitter_sender.py]
-        M[Send to Telegram\nnotification/telegram_sender.py]
+        L["Post to X or Twitter"]
+        M["Send to Telegram"]
     end
 
     A --> C
     B --> C
 
     C --> D
-    D -->|Article path| E --> F --> G
-    D -->|Random thought| H
-    D -->|Quote-tweet| I --> J
+    D --> E
+    D --> H
+    D --> I
+
+    E --> F --> G
+    I --> J
 
     G --> K
     H --> K
     J --> K
 
-    K -->|Final tweet| L
-    K -->|Final tweet + link| M
+    K --> L
+    K --> M
 ```
 
 - **Entry point**
