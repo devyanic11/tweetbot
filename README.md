@@ -1,6 +1,9 @@
-## AI Insight Tweet Engine
+## AI Tweet Engine
 
 **An automated tweet engine that turns AI/news articles and trending AI Twitter into opinionated, human-sounding tech tweets – then posts them to X (Twitter) and notifies you on Telegram.**
+
+<img width="1202" height="861" alt="Screenshot 2026-03-12 at 11 29 57 PM" src="https://github.com/user-attachments/assets/9e6b6d09-98a0-41cc-8dd4-21d708c78e2a" />
+
 
 This project periodically:
 
